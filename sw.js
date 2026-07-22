@@ -1,7 +1,7 @@
 /* IMPORTANTE: cada vez que subas un index.html nuevo, cambia este número de
    versión (v1 -> v2 -> v3...). Si no lo cambias, los móviles que ya tengan la
    app instalada seguirán viendo la versión vieja en caché durante días. */
-const CACHE_NAME = 'mi-taller-v21';
+const CACHE_NAME = 'mi-taller-v27';
 const ASSETS = [
   './',
   './index.html',
@@ -27,19 +27,20 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-/* Estrategia "network-first, cache-fallback": intenta traer siempre la
-   versión más reciente de la red y actualiza la caché; si no hay conexión,
-   sirve lo último guardado. Así la app funciona sin conexión pero no se
-   queda pegada a una versión antigua en cuanto hay internet. */
+/* Estrategia "cache-first, network-update": sirve SIEMPRE desde la copia local
+   guardada en el dispositivo al instante, sin esperar ni depender de tener
+   internet. Si hay conexión, de paso actualiza la caché en segundo plano
+   para la próxima vez, pero la app nunca se queda esperando a la red. */
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request, { cache: 'no-store' })
-      .then((resp) => {
+    caches.match(e.request).then((cached) => {
+      const actualizar = fetch(e.request).then((resp) => {
         const copy = resp.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(e.request, copy));
         return resp;
-      })
-      .catch(() => caches.match(e.request))
+      }).catch(() => cached);
+      return cached || actualizar;
+    })
   );
 });
