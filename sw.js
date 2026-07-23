@@ -1,7 +1,7 @@
 /* IMPORTANTE: cada vez que subas un index.html nuevo, cambia este número de
    versión (v1 -> v2 -> v3...). Si no lo cambias, los móviles que ya tengan la
    app instalada seguirán viendo la versión vieja en caché durante días. */
-const CACHE_NAME = 'mi-taller-v27';
+const CACHE_NAME = 'mi-taller-v28';
 const ASSETS = [
   './',
   './index.html',
